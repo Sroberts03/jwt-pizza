@@ -13,3 +13,19 @@ test('franchise page', async ({ page }) => {
     await expect(page.getByRole('main')).toContainText('So you want a piece of the pie?');
     await expect(page.locator('.bg-neutral-100')).toBeVisible();
 })
+
+test('about page', async ({ page }) => {
+    await page.goto('http://localhost:5173/');
+    await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
+    await page.getByRole('link', { name: 'About' }).click();
+    await expect(page.getByRole('main')).toContainText('The secret sauce');
+    await expect(page.getByRole('main').getByRole('img').first()).toBeVisible();
+})
+
+test('history page', async ({ page }) => {
+    await page.goto('http://localhost:5173/');
+    await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
+    await page.getByRole('link', { name: 'History' }).click();
+    await expect(page.getByRole('heading')).toContainText('Mama Rucci, my my');
+    await expect(page.getByRole('main').getByRole('img')).toBeVisible();
+})
