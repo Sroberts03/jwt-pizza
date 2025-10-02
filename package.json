@@ -12,7 +12,7 @@
     "test": "playwright test",
     "test:coverage": "nyc --reporter=json-summary --reporter=text playwright test",
     "record": "npx playwright codegen http://localhost:5173",
-    "trace viewer": "npx playwright test --ui"
+    "trace": "npx playwright test --ui"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.1",
