@@ -118,9 +118,9 @@ test('order pizza' , async ({ page }) => {
     //logout mock api
     await page.unroute('*/**/api/auth');
     await page.route('*/**/api/auth', async (route) => {
-        const loginRes = { message: "logout successful" };
+        const logoutRes = { message: "logout successful" };
         expect(route.request().method()).toBe('DELETE');
-        await route.fulfill({ json: loginRes });
+        await route.fulfill({ json: logoutRes });
     });
 
     //logout
