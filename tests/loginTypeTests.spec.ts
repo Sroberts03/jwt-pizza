@@ -1,24 +1,12 @@
 import { test, expect } from 'playwright-test-coverage';
+import {User, login, logout, franchiseeLogin, franchiseePageMockApi} from './testUtils';
 
 test('login and logout as diner', async ({ page }) => {
     await page.goto('http://localhost:5173/');
 
     //login mock api
-    await page.route('*/**/api/auth', async (route) => {
-        const loginReq = { email: 'test@test.test', password: 'testing123' };
-        const loginRes = {
-            user: {
-                id: 9,
-                name: 'testUser1',
-                email: 'test.test.test',
-                roles: [],
-            },
-            token: 'abcdef',
-        };
-        expect(route.request().method()).toBe('PUT');
-        expect(route.request().postDataJSON()).toMatchObject(loginReq);
-        await route.fulfill({ json: loginRes });
-    });
+    const dinerUser = new User('test@test.test','testing123','testUser1',9);
+    await login(page, dinerUser, 'diner');
 
     //login
     await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
@@ -35,11 +23,7 @@ test('login and logout as diner', async ({ page }) => {
 
     //logout mock api
     await page.unroute('*/**/api/auth');
-    await page.route('*/**/api/auth', async (route) => {
-        const logoutRes = { message: "logout successful" };
-        expect(route.request().method()).toBe('DELETE');
-        await route.fulfill({ json: logoutRes });
-    })
+    await logout(page);
 
     //logout
     await page.getByRole('link', { name: 'Logout' }).click();
@@ -52,21 +36,8 @@ test('login and logout as admin', async ({ page }) => {
     await expect(page.getByText('JWT Pizza', { exact: true })).toBeVisible();
 
     //login mock api
-    await page.route('*/**/api/auth', async (route) => {
-        const loginReq = { email: 'a@jwt.com', password: 'admin' };
-        const loginRes = {
-            user: {
-                id: 1,
-                name: '常用名字',
-                email: 'a@jwt.com',
-                roles: [{ role: 'admin' }],
-            },
-            token: 'abcdef',
-        };
-        expect(route.request().method()).toBe('PUT');
-        expect(route.request().postDataJSON()).toMatchObject(loginReq);
-        await route.fulfill({ json: loginRes });
-    });
+    const adminUser = new User('a@jwt.com', 'admin', '常用名字', 1);
+    await login(page, adminUser, 'admin');
 
     //login
     await page.getByRole('link', { name: 'Login' }).click();
@@ -86,11 +57,7 @@ test('login and logout as admin', async ({ page }) => {
 
     //logout mock api
     await page.unroute('*/**/api/auth');
-    await page.route('*/**/api/auth', async (route) => {
-        const logoutRes = { message: "logout successful" };
-        expect(route.request().method()).toBe('DELETE');
-        await route.fulfill({ json: logoutRes });
-    })
+    await logout(page);
 
     //logout
     await page.getByRole('link', { name: 'Logout' }).click();
@@ -104,25 +71,8 @@ test('login and logout as franchisee', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
 
     //login api mock
-    await page.route('*/**/api/auth', async (route) => {
-        const loginReq = { email: 'f@jwt.com', password: 'franchisee' };
-        const loginRes = {
-            user:
-                {
-                id: 3,
-                name: 'pizza franchisee',
-                email: 'f@jwt.com',
-                roles: [
-                    { role: 'diner' },
-                    { objectId: 1, role: 'franchisee' }
-                    ],
-                },
-            token: 'abcdef',
-        };
-        expect(route.request().method()).toBe('PUT');
-        expect(route.request().postDataJSON()).toMatchObject(loginReq);
-        await route.fulfill({ json: loginRes });
-    });
+    const franchiseeUser = new User('f@jwt.com', 'franchisee', 'pizza franchisee', 3);
+    await franchiseeLogin(page, franchiseeUser);
 
     //login
     await page.getByRole('link', { name: 'Login' }).click();
@@ -133,42 +83,7 @@ test('login and logout as franchisee', async ({ page }) => {
     await page.getByRole('button', { name: 'Login' }).click();
 
     //check franchisee page mock api
-    await page.route('*/**/api/franchise/3', async (route) => {
-        const franchiseeRes = [
-            {
-                id: 1,
-                name: "pizzaPocket",
-                admins: [
-                    {
-                    id: 3,
-                    name: "pizza franchisee",
-                    email: "f@jwt.com"
-                    }
-                ],
-                stores: [
-                    {
-                    id: 1,
-                    name: "SLC",
-                    totalRevenue: 3.9055
-                    }
-                ]
-            }
-        ]
-        expect(route.request().method()).toBe('GET');
-        await route.fulfill({ json: franchiseeRes });
-    })
-
-    //check order page mock api
-    await page.route('*/**/api/order', async (route) => {
-        const franchiseeRes =
-            {
-            dinerId: 3,
-            orders: [],
-            page: 1
-            }
-        expect(route.request().method()).toBe('GET');
-        await route.fulfill({ json: franchiseeRes });
-    })
+    await franchiseePageMockApi(page);
 
     //check account and franchisee page
     await expect(page.getByRole('link', { name: 'pf' })).toBeVisible();
@@ -181,11 +96,7 @@ test('login and logout as franchisee', async ({ page }) => {
 
     //logout mock api
     await page.unroute('*/**/api/auth');
-    await page.route('*/**/api/auth', async (route) => {
-        const logoutRes = { message: "logout successful" };
-        expect(route.request().method()).toBe('DELETE');
-        await route.fulfill({ json: logoutRes });
-    })
+    await logout(page);
 
     //logout
     await page.getByRole('link', { name: 'Logout' }).click();
