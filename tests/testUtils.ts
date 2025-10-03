@@ -87,6 +87,38 @@ async function franchiseePageMockApi(page) {
     }
 )}
 
+async function franchiseePageNewStoreMockApi(page) {
+    await page.route('*/**/api/franchise/3', async (route) => {
+            const franchiseeRes = [
+                {
+                    id: 1,
+                    name: "pizzaPocket",
+                    admins: [
+                        {
+                            id: 3,
+                            name: "pizza franchisee",
+                            email: "f@jwt.com"
+                        }
+                    ],
+                    stores: [
+                        {
+                            id: 1,
+                            name: "SLC",
+                            totalRevenue: 3.983
+                        },
+                        {
+                            id: 2,
+                            name: "testStore",
+                            totalRevenue: 0
+                        }
+                    ]
+                }
+            ]
+            expect(route.request().method()).toBe('GET');
+            await route.fulfill({ json: franchiseeRes });
+    }
+)}
+
 async function menuMockApi(page) {
     await page.route('*/**/api/order/menu', async (route) => {
         const menuRes = [
@@ -136,6 +168,28 @@ async function payMockApi(page) {
     }
 )}
 
+async function createStoreMockApi(page) {
+    await page.route('*/**/api/franchise/1/store', async (route) => {
+        const storeReq = {id: "", name: "testStore"};
+        const userRes = {
+            id: 2,
+            franchiseId: 1,
+            name: "testStore"
+        }
+        expect(route.request().method()).toBe('POST');
+        expect(route.request().postDataJSON()).toMatchObject(storeReq);
+        await route.fulfill({ json: userRes });
+    }
+)}
+
+async function deleteStoreMockApi(page) {
+    await page.route('*/**/api/franchise/1/store/2', async (route) => {
+        expect(route.request().method()).toBe('DELETE');
+        await route.fulfill({ json: { message: "Store deleted" } });
+    }
+)}
+
 
 export { User, login, logout, franchiseeLogin,
-    franchiseePageMockApi, menuMockApi, checkoutMockApi, payMockApi };
+    franchiseePageMockApi, menuMockApi, checkoutMockApi, payMockApi,
+    createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi};
