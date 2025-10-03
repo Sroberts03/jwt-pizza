@@ -84,7 +84,58 @@ async function franchiseePageMockApi(page) {
         ]
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: franchiseeRes });
-    })
-}
+    }
+)}
 
-export { User, login, logout, franchiseeLogin, franchiseePageMockApi };
+async function menuMockApi(page) {
+    await page.route('*/**/api/order/menu', async (route) => {
+        const menuRes = [
+            {
+                id: 1,
+                title: 'Veggie',
+                image: 'pizza1.png',
+                price: 0.0038,
+                description: 'A garden of delight',
+            },
+            {
+                id: 2,
+                title: 'Pepperoni',
+                image: 'pizza2.png',
+                price: 0.0042,
+                description: 'Spicy treat',
+            },
+        ];
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: menuRes });
+    }
+)}
+
+async function checkoutMockApi(page) {
+    await page.route('*/**/api/user/*', async (route) => {
+        const userRes = {
+            id: 9,
+            name: "testUser1",
+            email: "test@test.test",
+            roles: [],
+            iat: 1759435763
+        }
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: userRes });
+    }
+)}
+
+async function payMockApi(page) {
+    await page.route('*/**/api/order', async (route) => {
+        const orderReq = route.request().postDataJSON();
+        const orderRes = {
+            order: { ...orderReq, id: 23 },
+            jwt: 'eyJpYXQ',
+        };
+        expect(route.request().method()).toBe('POST');
+        await route.fulfill({ json: orderRes });
+    }
+)}
+
+
+export { User, login, logout, franchiseeLogin,
+    franchiseePageMockApi, menuMockApi, checkoutMockApi, payMockApi };
