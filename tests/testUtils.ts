@@ -81,7 +81,7 @@ async function franchiseePageMockApi(page) {
                     }
                 ]
             }
-        ]
+        ];
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: franchiseeRes });
     }
@@ -113,7 +113,7 @@ async function franchiseePageNewStoreMockApi(page) {
                         }
                     ]
                 }
-            ]
+            ];
             expect(route.request().method()).toBe('GET');
             await route.fulfill({ json: franchiseeRes });
     }
@@ -150,7 +150,7 @@ async function checkoutMockApi(page) {
             email: "test@test.test",
             roles: [],
             iat: 1759435763
-        }
+        };
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: userRes });
     }
@@ -175,7 +175,7 @@ async function createStoreMockApi(page) {
             id: 2,
             franchiseId: 1,
             name: "testStore"
-        }
+        };
         expect(route.request().method()).toBe('POST');
         expect(route.request().postDataJSON()).toMatchObject(storeReq);
         await route.fulfill({ json: userRes });
@@ -189,7 +189,106 @@ async function deleteStoreMockApi(page) {
     }
 )}
 
+async function adminFranchiseMockApi(page) {
+    await page.route('*/**/api/franchise?page=0&limit=3&name=*', async (route) => {
+        const franchiseRes = {
+            franchises: [
+                {
+                    id: 1,
+                    name: "pizzaPocket",
+                    admins: [
+                        {
+                            id: 3,
+                            name: "pizza franchisee",
+                            email: "f@jwt.com"
+                        }
+                    ],
+                    stores: [
+                        {
+                            id: 1,
+                            name: "SLC",
+                            totalRevenue: 3.983
+                        }
+                    ]
+                }
+            ],
+            more: false
+        };
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: franchiseRes });
+    }
+)}
+
+async function adminNewFranchiseMockApi(page) {
+    await page.route('*/**/api/franchise?page=0&limit=3&name=*', async (route) => {
+            const franchiseRes = {
+                franchises: [
+                    {
+                        id: 1,
+                        name: "pizzaPocket",
+                        admins: [
+                            {
+                                id: 3,
+                                name: "pizza franchisee",
+                                email: "f@jwt.com"
+                            }
+                        ],
+                        stores: [
+                            {
+                                id: 1,
+                                name: "SLC",
+                                totalRevenue: 3.983
+                            }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        name: "testFranchise",
+                        admins: [
+                            {
+                                id: 1,
+                                name: "常用名字",
+                                email: "a@jwt.com"
+                            }
+                        ],
+                        stores: []
+                    }
+                ],
+                more: false
+            };
+            expect(route.request().method()).toBe('GET');
+            await route.fulfill({ json: franchiseRes });
+        }
+    )}
+
+async function createFranchiseMockApi(page) {
+    await page.route('*/**/api/franchise', async (route) => {
+        const franchiseReq = {
+            stores: [],
+            id: 2,
+            name: "testFranchise",
+            admins: [
+                {
+                    email: "a@jwt.com",
+                    id: 1,
+                    name: "常用名字"
+                }
+            ]
+        };
+        expect(route.request().method()).toBe('POST');
+        await route.fulfill({ json: franchiseReq });
+    }
+)}
+
+async function deleteFranchiseMockApi(page) {
+    await page.route('*/**/api/franchise/2', async (route) => {
+        expect(route.request().method()).toBe('DELETE');
+        await route.fulfill({ json: { message: "Franchise deleted" } });
+    }
+)}
+
 
 export { User, login, logout, franchiseeLogin,
     franchiseePageMockApi, menuMockApi, checkoutMockApi, payMockApi,
-    createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi};
+    createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi,
+    adminFranchiseMockApi, createFranchiseMockApi, adminNewFranchiseMockApi, deleteFranchiseMockApi };

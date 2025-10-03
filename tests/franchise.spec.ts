@@ -1,7 +1,8 @@
 import { test, expect } from 'playwright-test-coverage';
 import {User, login, franchiseeLogin, logout,
     franchiseePageMockApi, createStoreMockApi, deleteStoreMockApi,
-    franchiseePageNewStoreMockApi} from './testUtils';
+    franchiseePageNewStoreMockApi, adminFranchiseMockApi,
+    createFranchiseMockApi, adminNewFranchiseMockApi, deleteFranchiseMockApi} from './testUtils';
 
 test('create and close store', async ({ page }) => {
     await page.goto('http://localhost:5173/');
@@ -71,8 +72,8 @@ test('create franchise and close franchise', async ({ page }) => {
     await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
 
     //login mock api
-    // const adminUser = new User('a@jwt.com', 'admin', 1, '常用名字');
-    // await login(page, adminUser, 'admin');
+    const adminUser = new User('a@jwt.com', 'admin', '常用名字', 1);
+    await login(page, adminUser, 'admin');
 
     //login
     await page.getByRole('link', { name: 'Login' }).click();
@@ -82,6 +83,16 @@ test('create franchise and close franchise', async ({ page }) => {
     await page.getByRole('textbox', { name: 'Password' }).fill('admin');
     await page.getByRole('button', { name: 'Login' }).click();
     await expect(page.getByRole('heading')).toContainText('The web\'s best pizza');
+
+    //admin franchise mock api
+    await adminFranchiseMockApi(page);
+
+    //create franchise mock api
+    await createFranchiseMockApi(page);
+
+    //new franchise mock api
+    await page.unroute('*/**/api/franchises');
+    await adminNewFranchiseMockApi(page);
 
     //add franchise
     await page.getByRole('link', { name: 'Admin' }).click();
@@ -94,6 +105,13 @@ test('create franchise and close franchise', async ({ page }) => {
     await page.getByRole('button', { name: 'Create' }).click();
     await expect(page.getByRole('cell', { name: 'testFranchise' })).toBeVisible();
 
+    //delete franchise mock api
+    await deleteFranchiseMockApi(page);
+
+    //back to admin page with no new franchise
+    await page.unroute('*/**/api/franchises');
+    await adminFranchiseMockApi(page);
+
     //close franchise
     await page.getByRole('row', { name: 'testFranchise 常用名字 Close' }).getByRole('button').click();
     await expect(page.getByRole('heading')).toContainText('Sorry to see you go');
@@ -101,7 +119,7 @@ test('create franchise and close franchise', async ({ page }) => {
     await expect(page.getByText('FranchisesFranchiseFranchiseeStoreRevenueActionpizzaPocketpizza franchisee')).toBeVisible();
 
     //logout mock api
-    // await logout(page);
+    await logout(page);
 
     //logout
     await page.getByRole('link', { name: 'Logout' }).click();
