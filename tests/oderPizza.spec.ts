@@ -1,6 +1,6 @@
 import { test, expect } from 'playwright-test-coverage';
-import {franchiseePageMockApi, login, logout,
-    menuMockApi, checkoutMockApi, payMockApi, User} from './testUtils';
+import {login, logout,
+    menuMockApi, checkoutMockApi, payMockApi, User, dinerFranchiseMockApi} from './testUtils';
 
 test('order pizza' , async ({ page }) => {
     await page.goto('http://localhost:5173/');
@@ -23,7 +23,7 @@ test('order pizza' , async ({ page }) => {
     await menuMockApi(page);
 
     //franchise mock api
-    await franchiseePageMockApi(page);
+    await dinerFranchiseMockApi(page);
 
     //order
     await page.getByRole('link', { name: 'Order' }).click();

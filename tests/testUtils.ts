@@ -287,8 +287,31 @@ async function deleteFranchiseMockApi(page) {
     }
 )}
 
+async function dinerFranchiseMockApi(page) {
+    await page.route('*/**/api/franchise?page=0&limit=20&name=*', async (route) => {
+        const franchiseRes = {
+            franchises: [
+                {
+                    id: 1,
+                    name: "pizzaPocket",
+                    stores: [
+                        {
+                            id: 1,
+                            name: "SLC"
+                        }
+                    ]
+                }
+            ],
+            more: false
+        };
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: franchiseRes });
+    }
+)}
+
 
 export { User, login, logout, franchiseeLogin,
     franchiseePageMockApi, menuMockApi, checkoutMockApi, payMockApi,
     createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi,
-    adminFranchiseMockApi, createFranchiseMockApi, adminNewFranchiseMockApi, deleteFranchiseMockApi };
+    adminFranchiseMockApi, createFranchiseMockApi, adminNewFranchiseMockApi,
+    deleteFranchiseMockApi,dinerFranchiseMockApi,};
