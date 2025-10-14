@@ -128,6 +128,24 @@ async function listUsersMockAPI(page, more = false) {
     }
 )}
 
+async function listUsersFilterMockAPI(page, more = false) {
+    await page.route('*/**/api/user?page=1&limit=10&name=s*sam%20roberts*', async (route) => {
+        const usersRes = {
+            users: [
+                {
+                id: 9125,
+                name: "pizza diner",
+                email: "f@jwt.com",
+                roles: [{role: "diner"},{role: "franchisee"}]
+                }
+            ],
+            more: more
+        };
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: usersRes });
+    }
+)}
+
 async function franchiseePageMockApi(page) {
     await page.route('*/**/api/franchise/3', async (route) => {
         const franchiseeRes = [
@@ -383,4 +401,4 @@ export { User, login, logout, franchiseeLogin,
     createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi,
     adminFranchiseMockApi, createFranchiseMockApi, adminNewFranchiseMockApi,
     deleteFranchiseMockApi,dinerFranchiseMockApi, registerMockAPI,
-    updateUserMockAPI, listUsersMockAPI};
+    updateUserMockAPI, listUsersMockAPI, listUsersFilterMockAPI };

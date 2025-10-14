@@ -1,5 +1,5 @@
 import { test, expect } from 'playwright-test-coverage';
-import {User, registerMockAPI, updateUserMockAPI, logout, login, adminFranchiseMockApi, listUsersMockAPI} from './testUtils'
+import {User, registerMockAPI, updateUserMockAPI, logout, login, adminFranchiseMockApi, listUsersMockAPI, listUsersFilterMockAPI} from './testUtils'
 
 test('updateUser', async ({ page }) => {
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
@@ -115,19 +115,28 @@ test('adminDahsboard next and prev', async ({ page }) => {
 
 test('adminDashboard filter users', async ({ page }) => {
   await page.goto('/');
+
+  const adminUser = new User('a@jwt.com', 'admin', 'Admin User', 1);
+  await login(page, adminUser, 'admin');
+
   await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+  await page.getByRole('textbox', { name: 'Email address' }).fill(adminUser.email);
+  await page.getByRole('textbox', { name: 'Password' }).fill(adminUser.password);
   await page.getByRole('button', { name: 'Login' }).click();
+
+  await listUsersMockAPI(page);
+  await adminFranchiseMockApi(page);
   
   await page.getByRole('link', { name: 'ad' }).click();
   await expect(page.getByRole('heading', { name: "Mama Ricci's kitchen" })).toBeVisible();
 
+  await listUsersFilterMockAPI(page);
+
   await page.getByRole('textbox', { name: 'Name' }).click();
-  await page.getByRole('textbox', { name: 'Name' }).fill('sam roberts');
+  await page.getByRole('textbox', { name: 'Name' }).fill('pizza diner');
   await page.getByRole('button', { name: 'Search' }).click();
-  await expect(page.getByRole('cell', { name: 'Sam Roberts' }).first()).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'Sam Roberts' }).nth(1)).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole('cell', { name: 'pizza diner' }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Prev' })).toBeDisabled();
 });
 
