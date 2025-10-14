@@ -146,6 +146,37 @@ async function listUsersFilterMockAPI(page, more = false) {
     }
 )}
 
+async function deleteUserMockAPI(page, userId: number) {
+    await page.route(`*/**/api/user/${userId}`, async (route) => {
+        expect(route.request().method()).toBe('DELETE');
+        await route.fulfill({ json: { message: "User deleted" } });
+    }
+)}
+
+async function deletedUserMockAPI(page, more = false) {
+     await page.route('*/**/api/user?page=1&limit=10&name=*', async (route) => {
+        const usersRes = {
+            users: [
+                {
+                id: 1,
+                name: "常用名字",
+                email: "a@jwt.com",
+                roles: [{role: "admin"}]
+                },
+                {
+                id: 3,
+                name: "pizza franchisee",
+                email: "f@jwt.com",
+                roles: [{role: "diner"},{role: "franchisee"}]
+                }
+            ],
+            more: more
+        };
+        expect(route.request().method()).toBe('GET');
+        await route.fulfill({ json: usersRes });
+    }
+)}
+
 async function franchiseePageMockApi(page) {
     await page.route('*/**/api/franchise/3', async (route) => {
         const franchiseeRes = [
@@ -401,4 +432,4 @@ export { User, login, logout, franchiseeLogin,
     createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi,
     adminFranchiseMockApi, createFranchiseMockApi, adminNewFranchiseMockApi,
     deleteFranchiseMockApi,dinerFranchiseMockApi, registerMockAPI,
-    updateUserMockAPI, listUsersMockAPI, listUsersFilterMockAPI };
+    updateUserMockAPI, listUsersMockAPI, listUsersFilterMockAPI, deleteUserMockAPI, deletedUserMockAPI };

@@ -1,5 +1,7 @@
 import { test, expect } from 'playwright-test-coverage';
-import {User, registerMockAPI, updateUserMockAPI, logout, login, adminFranchiseMockApi, listUsersMockAPI, listUsersFilterMockAPI} from './testUtils'
+import {User, registerMockAPI, updateUserMockAPI, 
+  logout, login, adminFranchiseMockApi, listUsersMockAPI, 
+  listUsersFilterMockAPI, deleteUserMockAPI, deletedUserMockAPI} from './testUtils'
 
 test('updateUser', async ({ page }) => {
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
@@ -142,18 +144,29 @@ test('adminDashboard filter users', async ({ page }) => {
 
 test('delete user', async ({ page }) => {
   await page.goto('/');
+  
+  const adminUser = new User('a@jwt.com', 'admin', 'Admin User', 1);
+  await login(page, adminUser, 'admin');
+
   await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+  await page.getByRole('textbox', { name: 'Email address' }).fill(adminUser.email);
+  await page.getByRole('textbox', { name: 'Password' }).fill(adminUser.password);
   await page.getByRole('button', { name: 'Login' }).click();
+
+  await listUsersMockAPI(page);
+  await adminFranchiseMockApi(page);
   
   await page.getByRole('link', { name: 'ad' }).click();
   await expect(page.getByRole('heading', { name: "Mama Ricci's kitchen" })).toBeVisible();
 
-  await expect(page.getByRole('row', { name: '常用名字 a@jwt.com Admin X' }).getByRole('button')).toBeVisible();
-  // await expect(page.getByRole('main')).toContainText('user9125@jwt.com');
-  await page.locator('tr:nth-child(9) > .px-6 > .px-2').click();
+  await page.unroute('*/**/api/user**');
+  await deletedUserMockAPI(page);
+
+  await deleteUserMockAPI(page, 2);
+  await expect(page.getByRole('row', { name: 'pizza diner d@jwt.com' }).getByRole('button')).toBeVisible();
+  await page.getByRole('row', { name: 'pizza diner d@jwt.com' }).getByRole('button').click();
   await expect(page.getByText('Are you sure you want to')).toBeVisible();
   await page.getByRole('button', { name: 'Delete' }).click();
-  await expect(page.getByText('Are you sure you want to')).not.toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole('row', { name: 'pizza diner d@jwt.com' })).not.toBeVisible();
 });
