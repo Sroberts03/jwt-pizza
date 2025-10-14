@@ -13,6 +13,44 @@ class User {
     }
 }
 
+async function registerMockAPI (page, user: User) {
+    await page.route('*/**/api/auth', async (route) => {
+        const registerReq = { email: user.email, password: user.password, name: user.name };
+        const registerRes = {
+            user: {
+                name: user.name,
+                email: user.email,
+                roles: [{ role: 'diner' }],
+                id: user.id
+            },
+            token: 'abcdef',
+        };
+        expect(route.request().method()).toBe('POST');
+        expect(route.request().postDataJSON()).toMatchObject(registerReq);
+        await route.fulfill({ json: registerRes });
+    });
+}
+
+async function updateUserMockAPI (page, user: User) {
+    await page.route(`*/**/api/user/${user.id}`, async (route) => {
+        const updateReq = { name: user.name, email: user.email };
+        const updateRes = {
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                roles: [
+                { role: 'diner' }
+                ]
+            },
+            token: 'abcdef',
+        };
+        expect(route.request().method()).toBe('PUT');
+        expect(route.request().postDataJSON()).toMatchObject(updateReq);
+        await route.fulfill({ json: updateRes });
+    });
+}
+
 async function login (page, user: User, role: string) {
     await page.route('*/**/api/auth', async (route) => {
         const loginReq = { email: user.email, password: user.password};
@@ -314,4 +352,5 @@ export { User, login, logout, franchiseeLogin,
     franchiseePageMockApi, menuMockApi, checkoutMockApi, payMockApi,
     createStoreMockApi, deleteStoreMockApi, franchiseePageNewStoreMockApi,
     adminFranchiseMockApi, createFranchiseMockApi, adminNewFranchiseMockApi,
-    deleteFranchiseMockApi,dinerFranchiseMockApi,};
+    deleteFranchiseMockApi,dinerFranchiseMockApi, registerMockAPI,
+    updateUserMockAPI};
