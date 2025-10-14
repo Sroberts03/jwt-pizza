@@ -97,3 +97,21 @@ test('adminDashboard filter users', async ({ page }) => {
   await expect(page.getByRole('cell', { name: 'Sam Roberts' }).nth(1)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Prev' })).toBeDisabled();
 });
+
+test('delete user', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
+  await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+  await page.getByRole('button', { name: 'Login' }).click();
+  
+  await page.getByRole('link', { name: 'ad' }).click();
+  await expect(page.getByRole('heading', { name: "Mama Ricci's kitchen" })).toBeVisible();
+
+  await expect(page.getByRole('row', { name: '常用名字 a@jwt.com Admin X' }).getByRole('button')).toBeVisible();
+  // await expect(page.getByRole('main')).toContainText('user9125@jwt.com');
+  await page.locator('tr:nth-child(9) > .px-6 > .px-2').click();
+  await expect(page.getByText('Are you sure you want to')).toBeVisible();
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await expect(page.getByText('Are you sure you want to')).not.toBeVisible();
+});

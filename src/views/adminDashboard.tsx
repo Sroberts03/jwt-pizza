@@ -52,14 +52,17 @@ export default function AdminDashboard(props: Props) {
     setUserList(await pizzaService.getUsers(userPage, 10, `*${filterUserRef.current?.value}*`));
   }
 
+  function deleteUser(user: User) {
+    navigate('/admin-dashboard/delete-user', { state: { user: user } });
+  }
+
   function roleLabel(user?: User | null) {
     const roles = user?.roles ?? [];
-    // show Admin if present, otherwise Franchisee if present, otherwise list all roles
     if (roles.some((r) => r.role === Role.Admin)) return 'Admin';
     if (roles.some((r) => r.role === Role.Franchisee)) return 'Franchisee';
     return roles.map((r) => r.role).join(', ');
   }
-
+    
   let response = <NotFound />;
   if (Role.isRole(props.user, Role.Admin)) {
     response = (
@@ -74,7 +77,7 @@ export default function AdminDashboard(props: Props) {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="uppercase text-neutral-100 bg-slate-400 border-b-2 border-gray-500">
                         <tr>
-                          {['Name', 'Email', 'Role'].map((header) => (
+                          {['Name', 'Email', 'Role', 'Action'].map((header) => (
                             <th key={header} scope="col" className="px-6 py-3 text-center text-xs font-medium">
                               {header}
                             </th>
@@ -88,6 +91,12 @@ export default function AdminDashboard(props: Props) {
                               <td className="text-start px-2 whitespace-nowrap text-l font-mono text-orange-600">{user.name}</td>
                               <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800">{user.email}</td>
                               <td className="text-start px-2 whitespace-nowrap text-sm font-normal text-gray-800">{roleLabel(user)}</td>
+                              <td className="px-6 py-1 whitespace-nowrap text-end text-sm font-medium">
+                                <button type="button" className="px-2 py-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-1 border-orange-400 text-orange-400  hover:border-orange-800 hover:text-orange-800" 
+                                onClick={() => deleteUser(user)}>
+                                  X
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
