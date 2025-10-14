@@ -98,7 +98,7 @@ async function logout (page) {
     }
 )}
 
-async function listUsersMockAPI(page) {
+async function listUsersMockAPI(page, more = false) {
     await page.route('*/**/api/user?page=1&limit=10&name=*', async (route) => {
         const usersRes = {
             users: [
@@ -121,7 +121,7 @@ async function listUsersMockAPI(page) {
                 roles: [{role: "diner"},{role: "franchisee"}]
                 }
             ],
-            more: false
+            more: more
         };
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: usersRes });

@@ -89,10 +89,17 @@ test('adminDashboard view users', async ({ page }) => {
 
 test('adminDahsboard next and prev', async ({ page }) => {
   await page.goto('/');
+
+  const adminUser = new User('admin@jwt.com', 'admin', 'Admin User', 1);
+  await login(page, adminUser, 'admin');
+
   await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('a@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin');
+  await page.getByRole('textbox', { name: 'Email address' }).fill(adminUser.email);
+  await page.getByRole('textbox', { name: 'Password' }).fill(adminUser.password);
   await page.getByRole('button', { name: 'Login' }).click();
+
+  await listUsersMockAPI(page, true);
+  await adminFranchiseMockApi(page);
   
   await page.getByRole('link', { name: 'ad' }).click();
   await expect(page.getByRole('heading', { name: "Mama Ricci's kitchen" })).toBeVisible();
